@@ -1,5 +1,6 @@
 # Introduction
-Utility functions for MRI reconstruction including:
+Utility functions for MRI reconstruction including
+
 * QSM (Quantitative Susceptibility Mapping)
 * UTE (Ultra-short TE)
 
