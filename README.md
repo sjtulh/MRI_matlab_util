@@ -1,4 +1,4 @@
-# Introduction
+# Intro
 Utility functions for MRI reconstruction including
 
 * QSM (Quantitative Susceptibility Mapping)
