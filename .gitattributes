@@ -1,0 +1,5 @@
+*.mexa64 binary
+*.mexmaci64 binary
+*.mexw64 binary
+*.raw binary
+*.mat binary
