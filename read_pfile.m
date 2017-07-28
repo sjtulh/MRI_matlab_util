@@ -30,9 +30,9 @@ hdr_rev = hdr.rdbm_rev;
 % size of header (depends on revision)
 % ==== Try different offset, by Zhe Liu ==== %
 if hdr_rev >= 24
-    hdr_size = 157276;      % Get from Pascal's code
+    hdr_size = 157276;
 elseif hdr_rev >= 20
-    hdr_size = 145908+3880;
+    hdr_size = 149788;
 elseif hdr_rev >= 14
     hdr_size = 145908;
 else
@@ -49,18 +49,19 @@ else
         hdr_size = 66072;
     end
 end
+hdr_size = hdr.off_data;
 
 % some size parameters
-nex  = hdr.navs
-nex = 1
-nsli = hdr.nslices
-nech = hdr.nechoes
-yres = hdr.nframes
+nex  = hdr.navs;
+nex = 1;
+nsli = hdr.nslices;
+nech = hdr.nechoes;
+yres = hdr.nframes;
 yacq = hdr.da_yres; % includes initial baseline
-xres = hdr.frame_size
+xres = hdr.frame_size;
 edr  = hdr.point_size*2; % bytes per data point
 nr   = double(hdr.rc_xres); % to avoid class mismatches
-ncoi = hdr.dab_stop_rcv(1)+1
+ncoi = hdr.dab_stop_rcv(1)+1;
 
 % storage
 if edr==4
