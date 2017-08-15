@@ -3,3 +3,4 @@
 *.mexw64 binary
 *.raw binary
 *.mat binary
+*.jpg binary

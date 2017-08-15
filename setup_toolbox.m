@@ -5,11 +5,15 @@
 % irt
 run([pwd, '/irt/setup.m']);
 
+% bwdistsc
+addpath(genpath([pwd, '/bwdistsc']))
+
 % ute
 addpath(genpath([pwd, '/ute']))
 
 % util
 addpath([pwd])
+
 
 
 %% Inline Function
