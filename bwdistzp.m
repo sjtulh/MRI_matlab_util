@@ -48,5 +48,7 @@ d_map_pad = bwdist(img_pad)*vx;
 fd_map_pad = fftn(ifftshift(d_map_pad));
 fd_map = circshift(trim3(circshift(fd_map_pad, [0,0,shift_z]), matrix_size), [0,0,-shift_z]);
 d_map = fftshift(ifftn(fd_map));
+d_map = real(d_map);
+d_map(d_map < 0) = 0;
 
 end
