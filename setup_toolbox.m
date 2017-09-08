@@ -11,6 +11,9 @@ addpath(genpath([pwd, '/bwdistsc']))
 % ute
 addpath(genpath([pwd, '/ute']))
 
+% ssqsm
+addpath(genpath([pwd, '/ssqsm_bilgic']))
+
 % util
 addpath([pwd])
 
