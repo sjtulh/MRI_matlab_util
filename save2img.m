@@ -1,5 +1,7 @@
 function save2img(filename, img, scale, map)
 
+img = double(img);
+
 if nargin < 4
     map = colormap('gray');
 end
@@ -26,8 +28,18 @@ else
 
     img = (img - mini) / (maxi - mini);
 
-    imwrite(img*256, map, filename);
+    if ~isempty(regexp(filename, '.jpe?g$'))
+        imwrite(img*255, map, filename);
+    else
+        imwrite(map_rgb(img*63+1, map), filename);
+    end
 
 end
+
+end
+
+function img_rgb = map_rgb(img_gray, map)
+
+img_rgb = reshape(map([floor(img_gray(:))],:), [size(img_gray),3]);
 
 end
