@@ -33,6 +33,11 @@ if isfield(param, 'diameter_out')
     diameter_out = param.diameter_out;
 end
 
+step_diameter = 2;
+if isfield(param, 'step_diameter')
+    step_diameter = param.step_diameter;
+end
+
 
 
 %% Laplacian unwrapping kernel
@@ -64,7 +69,7 @@ phs_bk = phs;
 
 %% V-Sharp filtering for background removal
 stol = .2;                  % truncation threshold
-Kernel_Sizes = diameter_in:-2:diameter_out;
+Kernel_Sizes = diameter_in:-step_diameter:diameter_out;
 % Kernel_Sizes = 3;           % Changed from Bilgic's script due to small matrix size
 
 DiffMask = zeros([N, length(Kernel_Sizes)]);
@@ -122,7 +127,7 @@ phs = 0;
 % end
 
 % A cleaner version
-[Del_Sharp, dummy, DiffMask, Mask_Sharp] = prepare_VSHARP((Kernel_Sizes-1)/2, mask_bet, N, voxel_size);
+[Del_Sharp, dummy, DiffMask, Mask_Sharp] = prepare_VSHARP(Kernel_Sizes/2, mask_bet, N, voxel_size);
 phs = 0;
 for k = 1:size(DiffMask,4)
     phs = phs + DiffMask(:,:,:,k) .* real(ifftn(Del_Sharp(:,:,:,k) .* Phase_unwrap)) / (TE * B0 * gyro);
