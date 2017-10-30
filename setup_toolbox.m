@@ -14,6 +14,9 @@ addpath(genpath([pwd, '/ute']))
 % ssqsm
 addpath(genpath([pwd, '/ssqsm_bilgic']))
 
+% EM
+addpath(genpath([pwd, '/EM']))
+
 % util
 addpath([pwd])
 
