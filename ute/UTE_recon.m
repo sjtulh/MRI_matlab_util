@@ -51,35 +51,62 @@ end
 %% Main recon process
 
 % Load header and data
-[data,dummy,dummy,dummy,dummy,hdr] = read_pfile(pfile_name);
-
+% ------------ (Only work for DV25 and below) -------------- %
+% [data,dummy,dummy,dummy,dummy,hdr] = read_pfile_legacy(pfile_name);
 % Load parameter from header
-FOV = hdr.fov/1000;
-CF = double(hdr.ps_aps_freq/10);
-nslice = hdr.nslices;
-necho = hdr.nechoes;
-ncoil = hdr.dab_stop_rcv(1)+1;
-z_scale = hdr.user2;
-a_gxw = double(hdr.user4);
-pw_gxwa = double(hdr.user5);
-opplane = hdr.user7;
-delta_t= double(hdr.user8);
-rhfrsize = double(hdr.user9); 
-GAM = double(hdr.user10);
-opxres = hdr.user11;
-num_proj = hdr.user15;
-TR = double(hdr.user31) * 1e-6;
+% FOV = hdr.fov/1000;
+% CF = double(hdr.ps_aps_freq/10);
+% nslice = hdr.nslices;
+% necho = hdr.nechoes;
+% ncoil = hdr.dab_stop_rcv(1)+1;
+% z_scale = hdr.user2;
+% a_gxw = double(hdr.user4);
+% pw_gxwa = double(hdr.user5);
+% opplane = hdr.user7;
+% delta_t= double(hdr.user8);
+% rhfrsize = double(hdr.user9); 
+% GAM = double(hdr.user10);
+% opxres = hdr.user11;
+% num_proj = hdr.user15;
+% TR = double(hdr.user31) * 1e-6;
+% if isempty(TE_list)
+%     TE = double([hdr.user23, hdr.user25, hdr.user24, hdr.user26]) * 1e-6;
+% else
+%     TE = TE_list * 1e-6;
+
+% -------------------- (Work for DV26) --------------------- %
+[data, hdr] = read_pfile(pfile_name);
+data = permute(data, [1,2,5,3,4]);
+% Load parameter from header
+FOV = double(hdr.rdb_hdr_image.dfov/1000);
+CF = double(hdr.rdb_hdr_ps.aps_freq/10);
+nslice = double(hdr.rdb_hdr_rec.rdb_hdr_nslices);
+necho = double(hdr.rdb_hdr_rec.rdb_hdr_nechoes);
+ncoil = double(hdr.rdb_hdr_rec.rdb_hdr_dab.stop_rcv(1))-...
+    double(hdr.rdb_hdr_rec.rdb_hdr_dab.start_rcv(1))+1;
+z_scale = double(hdr.rdb_hdr_rec.rdb_hdr_user2);
+a_gxw = double(hdr.rdb_hdr_rec.rdb_hdr_user4);
+pw_gxwa = double(hdr.rdb_hdr_rec.rdb_hdr_user5);
+opplane = double(hdr.rdb_hdr_rec.rdb_hdr_user7);
+delta_t= double(hdr.rdb_hdr_rec.rdb_hdr_user8);
+rhfrsize = double(hdr.rdb_hdr_rec.rdb_hdr_user9); 
+GAM = double(hdr.rdb_hdr_rec.rdb_hdr_user10);
+opxres = double(hdr.rdb_hdr_rec.rdb_hdr_user11);
+num_proj = double(hdr.rdb_hdr_rec.rdb_hdr_user15);
+TR = double(hdr.rdb_hdr_rec.rdb_hdr_user31) * 1e-6;
+if isempty(TE_list)
+    TE = double([hdr.rdb_hdr_rec.rdb_hdr_user23, hdr.rdb_hdr_rec.rdb_hdr_user25, hdr.rdb_hdr_rec.rdb_hdr_user24, hdr.rdb_hdr_rec.rdb_hdr_user26]) * 1e-6;
+else
+    TE = TE_list * 1e-6;
+end
 
 const = double(FOV/opxres*1e-4);
 xres = opxres;
 fov = FOV*1000;
 matrix_size = double([xres,xres,xres]);
 voxel_size = double(fov * 1./matrix_size).*[1,1,z_scale];
-if isempty(TE_list)
-    TE = double([hdr.user23, hdr.user25, hdr.user24, hdr.user26]) * 1e-6;
-else
-    TE = TE_list * 1e-6;
-end
+
+
 if isempty(SE_list)
     SE_list = 1:length(TE);
 end
@@ -99,6 +126,7 @@ end
 data = permute(data,[1 2 5 3 4]);
 data = reshape(data, [rhfrsize, 512*nslice, ncoil, necho]);
 data = data(n_cut_point+1:end, 1:num_proj, :,:);
+rhfrsize = rhfrsize - n_cut_point;
 data = double(data);
 
 % Calculate trajectory with gradient offset 
