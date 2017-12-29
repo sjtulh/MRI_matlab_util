@@ -125,8 +125,15 @@ end
 % Re-arrange data
 data = permute(data,[1 2 5 3 4]);
 data = reshape(data, [rhfrsize, 512*nslice, ncoil, necho]);
+% --------- Extra pre-processing ------- %
+% 1. Cut readout
 data = data(n_cut_point+1:end, 1:num_proj, :,:);
 rhfrsize = rhfrsize - n_cut_point;
+% 2. Select coil (channel)
+if ~isempty(coil_select)
+    data = data(:, :, coil_select, :);
+    ncoil = length(coil_select);
+end    
 data = double(data);
 
 % Calculate trajectory with gradient offset 
@@ -273,10 +280,17 @@ else
     [Y,X,Z]=meshgrid(-matrix_size(2)/2:matrix_size(2)/2-1,...
                      -matrix_size(1)/2:matrix_size(1)/2-1,...
                      -matrix_size(3)/2:matrix_size(3)/2-1);
-    X = X*voxel_size(1);
-    Y = Y*voxel_size(2);
-    Z = Z*voxel_size(3);    
-    radius_map = (X.^2+Y.^2+Z.^2).^0.5;
+%     X = X*voxel_size(1);
+%     Y = Y*voxel_size(2);
+%     Z = Z*voxel_size(3);    
+%     radius_map = (X.^2+Y.^2+Z.^2).^0.5;
+    % Normalize cutoff and width, w.r.t. anisotropic FOV
+    X = X/(matrix_size(1)*voxel_size(1));
+    Y = Y/(matrix_size(2)*voxel_size(2));
+    Z = Z/(matrix_size(3)*voxel_size(3));
+    radius_map = (X.^2+Y.^2+Z.^2).^0.5;     % in Kspace (Unit mm^-1)
+    %   cutoff: by default 1/40 mm^-1
+    %           obtained from FOV = 240mm and cutoff = 6 * 1/FOV
     fermi_map = 1./(1 + exp((radius_map - sens_cutoff) /sens_transwidth));
     fermi_map = double(fermi_map);
     

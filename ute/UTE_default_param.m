@@ -15,6 +15,7 @@ param_recon_def.offset_fov = [0, 0, 0];
 param_recon_def.flag_combine_coil = 1;
 param_recon_def.flag_combine_echo = 1;
 param_recon_def.fac_under_manual = 1;
+param_recon_def.coil_select = [];
 
 % Gridding option
 param_recon_def.n_neighbor_grid = 5;
@@ -24,8 +25,8 @@ param_recon_def.fac_fft_size_grid = 1.5;
 param_recon_def.flag_save_inter = 1;
 param_recon_def.flag_use_cache = 0;
 % Filter (fermi)
-param_recon_def.sens_cutoff = 6;
-param_recon_def.sens_transwidth = 3;
+param_recon_def.sens_cutoff = 4/240;         % Default for 240mm FOV 
+param_recon_def.sens_transwidth = 2/240;     %   Zhe Liu, 12/12/2017
 % Reg option
 param_recon_def.lambda = 5e-2;
 param_recon_def.cg_max_iter = 10;
