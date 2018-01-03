@@ -51,7 +51,8 @@ iFreq_raw1 = iFreq_raw(:,:,:);
 if SUBSAMPLE == 2
     iField = iField(1:SUBSAMPLE:end,1:SUBSAMPLE:end,:,:);
     iFreq_raw1 = iFreq_raw0(1:SUBSAMPLE:end,1:SUBSAMPLE:end,:);
-    N_std = N_std(1:SUBSAMPLE:end,1:SUBSAMPLE:end,:);
+    N_std1 = N_std(1:SUBSAMPLE:end,1:SUBSAMPLE:end,:);
+    Mask = Mask(1:SUBSAMPLE:end,1:SUBSAMPLE:end,:);
     voxel_size(1) = voxel_size(1)/0.5;
     voxel_size(2) = voxel_size(2)/0.5;
 end
@@ -62,7 +63,7 @@ iMag = sqrt(sum(abs(iField).^2,4));
 
 delta_TE = TE(2) - TE(1);
 
-if nargin < 6
+if nargin < 6 || isempty(dfat)
     dfat = -3.5e-6*CF;
 end
     dyna_range = 1/delta_TE;
@@ -76,8 +77,10 @@ w1 = effect_fat_rad/pi
 
 if (w1 > 0)
     w = w1;
-    [unwphw,iter,erglist] = phase_unwrap_3d(iFreq_raw1,p,iMag,voxel_size); 
+    [unwphw,iter,erglist] = phase_unwrap_3d(iFreq_raw1,p,iMag,voxel_size);
     energy = erglist;
+    % Correct 2*pi shift
+    unwphw = correct_2pi_shift(unwphw, Mask);
     [wkappa,wm_fat,wunwph_uf,iter,erglist,wkiter] = unwrap_unfat_3dP(voxel_size,iMag,w,unwphw,p); % a small mistake found here. 2014.2.21
     energy = [energy erglist];
 end
@@ -85,11 +88,17 @@ end
 
 if (w1 < 0)
     w = -w1;  
-    [unwphw,iter,erglist] = phase_unwrap_3d(iFreq_raw1,p,iMag,voxel_size);  
+    [unwphw,iter,erglist] = phase_unwrap_3d(iFreq_raw1,p,iMag,voxel_size);
     energy = erglist;
+    % Correct 2*pi shift
+    unwphw = correct_2pi_shift(unwphw, Mask);
     [wkappa,wm_fat,wunwph_uf,iter,erglist,wkiter] = unwrap_unfat_3dN(voxel_size,iMag,w,unwphw,p);
     energy = [energy erglist];
 end
+
+% Correct 2*pi shift
+[wunwph_uf, n_2pi] = correct_2pi_shift(wunwph_uf, Mask);
+wkappa = wkappa - n_2pi*2;
 
 % interpolation to get the field map
 if SUBSAMPLE == 2
@@ -119,23 +128,24 @@ if SUBSAMPLE == 2
     wunwph_uf = iFreq_raw + K*pi;
  end
 
-iField = iField0;
+% iField = iField0;
+iField = conj(iField0);     % Fix bug, to be consistent with Fit_ppm_complex
 % 
 
 %% Run IDEAL take wunwph_uf as initial guess 
 %% 
 
 % Modify wunuph_uf: subtract multiple of 2*pi
-wunwph_uf_raw = wunwph_uf;
-tmp = wunwph_uf;
-idxs_try = [-5:5];
-clear tmps
-for i = 1:length(idxs_try)
-    tmps(i) = abs(sum(col((tmp - 2*pi*idxs_try(i)).*Mask)));
-end
-[~,idx_tmp] = min(tmps);
-idx_wrap = idxs_try(idx_tmp)
-wunwph_uf = tmp - 2*pi*idx_wrap;
+% wunwph_uf_raw = wunwph_uf;
+% tmp = wunwph_uf;
+% idxs_try = [-5:5];
+% clear tmps
+% for i = 1:length(idxs_try)
+%     tmps(i) = abs(sum(col((tmp - 2*pi*idxs_try(i)).*Mask)));
+% end
+% [~,idx_tmp] = min(tmps);
+% idx_wrap = idxs_try(idx_tmp)
+% wunwph_uf = tmp - 2*pi*idx_wrap;
 
 
 
