@@ -17,9 +17,15 @@ id = repmat(id,[1,1,3,1]);
 idmov = immovie(id);
 
 try
-    movie2avi(idmov, filename, 'compression', 'FFDS');
+    v = VideoWriter(filename, 'Uncompressed AVI');
+    v.FrameRate = 15;
+    open(v)
+    writeVideo(v, idmov);
+    close(v)
+    
+    
 catch
-    movie2avi(idmov, filename);
+%     VideoWriter(idmov, filename);
 end
 
 end
