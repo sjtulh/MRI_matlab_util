@@ -38,6 +38,11 @@ if isfield(param, 'step_diameter')
     step_diameter = param.step_diameter;
 end
 
+P = ones(N);
+if isfield(param, 'P')
+    P = param.P;
+end
+
 xbase =zeros(N);
 if isfield(param, 'xbase')
     xbase = fftn(param.xbase);
@@ -210,8 +215,9 @@ Rhs_pcg = conj(D) .* Rhs_pcg;       % right hand side
 lambda_ss = lambda;                  
 
 B_inv = 1 ./ (eps + abs(Del_Sharp(:,:,:,1) .* D).^2 + lambda_ss*E2);        % preconditioner
+B_inv(1) = 0;
 % B_inv = ones(N);
-precond_inv = @(x, B_inv) B_inv(:).*x;
+precond_inv = @(x, B_inv) col(fftn(P.*ifftn(B_inv.*fftn(P.*ifftn(reshape(x, N))))));
 
 x0 = B_inv .* Rhs_pcg;              % initial guess
 % x0(:) = 0;

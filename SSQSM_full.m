@@ -135,12 +135,8 @@ phs = 0;
 [Del_Sharp, dummy, DiffMask, Mask_Sharp] = prepare_VSHARP(Kernel_Sizes/2, mask_bet, N, voxel_size);
 phs = 0;
 % Full (approximate) kernel
-Mask_Sharp(:,:,:,end) = mask_bet;
-if length(Kernel_Sizes) > 1
-    DiffMask(:,:,:,end) = Mask_Sharp(:,:,:,end) & ~Mask_Sharp(:,:,:,end-1);
-else
-    DiffMask(:,:,:,end) = Mask_Sharp(:,:,:,end);
-end
+DiffMask(:,:,:,end) = DiffMask(:,:,:,end) | (mask_bet & ~Mask_Sharp);
+Mask_Sharp = mask_bet;
 weights_Sharp(:) = 1;
 weights_Sharp(:,:,:,end) = DiffMask(:,:,:,end).*make_clean(1./SMV(mask_bet, N, voxel_size, Kernel_Sizes(end)/2));
 for k = 1:size(DiffMask,4)-1
@@ -211,9 +207,9 @@ for k = 1:size(Del_Sharp,4)
 end
 Rhs_pcg = conj(D) .* Rhs_pcg;       % right hand side
 % With base vector: xbase
-Rhs_pcg = Rhs_pcg - lambda * (cfdx.*fftn(magn_weight(:,:,:,1) .* ifftn(fdx.*xbase)) + ...
-                                               cfdy.*fftn(magn_weight(:,:,:,2) .* ifftn(fdy.*xbase)) + ...
-                                               cfdz.*fftn(magn_weight(:,:,:,3) .* ifftn(fdz.*xbase)));
+% Rhs_pcg = Rhs_pcg - lambda * (cfdx.*fftn(magn_weight(:,:,:,1) .* ifftn(fdx.*xbase)) + ...
+%                                                cfdy.*fftn(magn_weight(:,:,:,2) .* ifftn(fdy.*xbase)) + ...
+%                                                cfdz.*fftn(magn_weight(:,:,:,3) .* ifftn(fdz.*xbase)));
 
 
 % lambda_ss = 2.9e-2;                 % regularization parameter
@@ -224,6 +220,7 @@ precond_inv = @(x, B_inv) B_inv(:).*x;
 
 x0 = B_inv .* Rhs_pcg;              % initial guess
 x0(:) = 0;
+x0 = xbase(:);
 
 
 % tic
