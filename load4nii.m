@@ -11,7 +11,7 @@ voxel_size = voxel_size(2:4);
 if flag_noflip
     img = nii.img;  
 else
-    img = flipdim(flipdim(flipdim(nii.img,3),2),1);
+    img = flipdim(flipdim(nii.img,2),1);
 end
 
 
