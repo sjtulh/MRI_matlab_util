@@ -76,12 +76,13 @@ end
 
 % extra unknown, p0_o2e:    phase shift from odd to even echo
 A = [1  0  0;
-     1  1  1;
-     1  0  2;
-     1  1  3;
-     1  0  4;
-     1  1  5];
+     0  1  1;
+     1  0  2;];
+     %0  1  3;
+     %1  0  4;
+     %0  1  5];
 Y = reshape(permute(cat(3, Y_odd, Y_even), [1,3,2]), [prod(s0(1:L_s0-1)),6]); 
+Y = Y(:, 1:size(A, 1));
 ip = A(:,:)\Y(:,:)'; 
 p0 = ip(1,:)';
 p0_o2e = ip(2,:)';
@@ -94,9 +95,10 @@ max_iter = 30;
 
 % weigthed least square
 % calculation of WA'*WA
-v1=ones(1,nechos);
+v1=zeros(1,nechos); v1(1:2:end) = 1;
 v2=zeros(1,nechos); v2(2:2:end) = 1;
 v3=(0:(nechos-1));
+% v3=floor((0:(nechos-1))/2);
 
 % a11=sum(abs(M).^2.*(ones(s(1),1)*(v1.^2)),2);
 % a12=sum(abs(M).^2.*(ones(s(1),1)*(v1.*v2)),2);
