@@ -1,5 +1,5 @@
 % Prepare preconditioner for Total Field Inversion (TFI)
-%   [P] = gen_precond(Mask, Ps, R2star)
+%   [P] = gen_precond(Mask, Ps, R2star, R2star_th, R2star_P)
 %
 %   output
 %   P - Precondioner:   Used as element-wise multiplier
@@ -14,6 +14,7 @@
 %   R2star_th (optional) - threshold level for R2*,
 %                          ( Mask of "strong" soft tissue := R2* >= R2star_th )
 %                           Default: 30 sec^-1
+%   R2star_P (optional) - weight for high R2*
 %
 %
 %   When using the code, please cite 
@@ -26,7 +27,15 @@
 %
 % ==== by Zhe Liu, 5/8/2017 ==== %
 
-function [P, Mask_G] = gen_precond(Mask, Ps, R2star, R2star_th)
+function [P, Mask_G] = gen_precond(Mask, Ps, R2star, R2star_th, R2star_P)
+
+if nargin < 2
+    Ps = 30;
+end
+
+if nargin < 5
+    R2star_P = Ps;
+end
 
 if nargin < 4
     R2star_th = 30;
@@ -38,15 +47,12 @@ else
     flag_R2s = 1;
 end
 
-if nargin < 2
-    Ps = 30;
-end
-
 if flag_R2s
     % Use R2*
     Mask_weak = (R2star < R2star_th) & Mask;
     Mask_strong = ~Mask_weak;
-    P = 1*single(Mask_weak) + Ps*single(Mask_strong);
+    Mask_R2s = R2star >= R2star_th;
+    P = 1*single(Mask_weak) + Ps*single(~Mask) + R2star_P*single(Mask & ~Mask_weak);
     Mask_G = 1*single(Mask) + 1/Ps*single(Mask);
 else
     % Do not use R2*
